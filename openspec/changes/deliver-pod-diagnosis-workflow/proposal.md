@@ -27,8 +27,8 @@
 
 ## Impact
 
-- 扩展 `aiops-server` 的 Task、Report 和 Orchestrator API。
-- 扩展 `worker` 的诊断任务处理器。
+- 扩展 `opsweaver-server` 的 Task、Report 和 Orchestrator API。
+- 扩展 `opsweaver-worker` 的诊断任务处理器。
 - 新增 Pod 重启 Skill、Workflow、Prompt 和示例配置。
 - 增加 Redis、双数据库、模拟外部服务参与的端到端测试。
 - 依赖前三个 Change 的全部基础能力。

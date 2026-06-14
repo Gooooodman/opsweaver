@@ -3,5 +3,5 @@ package main
 import "log"
 
 func main() {
-	log.Println("Starting tool-gateway")
+	log.Println("Starting opsweaver-worker")
 }

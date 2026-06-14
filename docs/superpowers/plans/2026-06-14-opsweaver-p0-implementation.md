@@ -4,7 +4,7 @@
 
 **Goal:** 按四个可独立验收的 OpenSpec Change 交付 OpsWeaver P0 平台底座和 Pod 重启诊断闭环。
 
-**Architecture:** `aiops-server` 负责控制面与 Registry，`worker` 通过 Asynq 执行异步 Workflow，`tool-gateway` 是唯一 Tool 执行入口。开发环境使用 Docker Compose 启动一个 PostgreSQL 实例中的两个逻辑数据库和一个 Redis 实例。
+**Architecture:** `opsweaver-server` 负责控制面与 Registry，`opsweaver-worker` 通过 Asynq 执行异步 Workflow，`opsweaver-gateway` 是唯一 Tool 执行入口。开发环境使用 Docker Compose 启动一个 PostgreSQL 实例中的两个逻辑数据库和一个 Redis 实例。
 
 **Tech Stack:** Go、Gin、GORM、PostgreSQL、Redis、Asynq、Docker Compose、client-go、Prometheus HTTP API、Streamable HTTP MCP、OpenAI-compatible API。
 
@@ -16,9 +16,9 @@
 
 ```text
 cmd/
-  aiops-server/main.go
-  worker/main.go
-  tool-gateway/main.go
+  opsweaver-server/main.go
+  opsweaver-worker/main.go
+  opsweaver-gateway/main.go
   migrate/main.go
 internal/
   platform/       # config、logging、database、redis、auth、crypto、metrics
@@ -31,8 +31,8 @@ internal/
   task/           # Task 生命周期和执行权
   report/         # RCA Report 校验与持久化
 configs/skills/
-migrations/aiops/
-migrations/tool_gateway/
+migrations/opsweaver_server/
+migrations/opsweaver_gateway/
 deploy/
 tests/e2e/
 ```

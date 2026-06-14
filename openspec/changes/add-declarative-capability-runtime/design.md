@@ -1,6 +1,6 @@
 ## Context
 
-本 Change 将第三方 MCP Tool 与声明式 Skill 接入既有 Tool Gateway。Registry 仍由 `aiops-server` 管理，Worker 负责异步同步和 Workflow 执行，Tool Gateway 负责 MCP 网络调用和证据审计。
+本 Change 将第三方 MCP Tool 与声明式 Skill 接入既有 Tool Gateway。Registry 仍由 `opsweaver-server` 管理，Worker 负责异步同步和 Workflow 执行，Tool Gateway 负责 MCP 网络调用和证据审计。
 
 ## Goals / Non-Goals
 
@@ -25,7 +25,7 @@
 
 ### 决策 2：MCP 同步走异步任务
 
-注册只保存并校验配置，随后提交 `mcp.sync-tools` Asynq 任务。Worker 请求 Tool Gateway 执行远程 `tools/list`，再将映射结果回写 `aiops-server`。
+注册只保存并校验配置，随后提交 `mcp.sync-tools` Asynq 任务。Worker 请求 Tool Gateway 执行远程 `tools/list`，再将映射结果回写 `opsweaver-server`。
 
 ### 决策 3：Skill 内容入库
 

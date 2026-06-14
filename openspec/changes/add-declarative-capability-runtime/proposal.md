@@ -27,8 +27,8 @@ Tool 执行面建立后，平台还需要让第三方 MCP Server 和声明式 Sk
 
 ## Impact
 
-- 扩展 `aiops-server` 的 MCP、Skill、Workflow Registry API 和内部快照 API。
-- 扩展 `worker` 的 MCP 同步和 Workflow 执行能力。
-- 扩展 `tool-gateway` 的 MCP Adapter 和管理接口。
+- 扩展 `opsweaver-server` 的 MCP、Skill、Workflow Registry API 和内部快照 API。
+- 扩展 `opsweaver-worker` 的 MCP 同步和 Workflow 执行能力。
+- 扩展 `opsweaver-gateway` 的 MCP Adapter 和管理接口。
 - 新增 YAML、MCP Client 与 OpenAI-compatible Client 相关依赖。
 - 依赖前两个 Change 提供的异步队列、Tool Registry、Tool Invoke、Evidence 和 Audit。
