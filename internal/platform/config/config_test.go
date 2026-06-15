@@ -1,6 +1,7 @@
 package config_test
 
 import (
+	"encoding/base64"
 	"os"
 	"path/filepath"
 	"strings"
@@ -142,6 +143,61 @@ func TestLoadEnforcesRedisDatabaseAssignments(t *testing.T) {
 	}
 }
 
+func TestLoadRejectsInvalidMasterKey(t *testing.T) {
+	tests := []struct {
+		name     string
+		envValue string
+		want     string
+	}{
+		{
+			name:     "not base64",
+			envValue: "!!!not-base64!!!",
+			want:     "must be valid base64",
+		},
+		{
+			name:     "wrong length",
+			envValue: base64.StdEncoding.EncodeToString([]byte("short-key")),
+			want:     "must decode to a 32-byte key",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			path := writeConfig(t, validConfigYAML)
+			t.Setenv("MASTER_KEY_BASE64", tt.envValue)
+
+			_, err := config.Load(path)
+			if err == nil {
+				t.Fatal("Load() error = nil, want master key error")
+			}
+			if !strings.Contains(err.Error(), tt.want) {
+				t.Fatalf("Load() error = %q, want %q", err, tt.want)
+			}
+		})
+	}
+}
+
+func TestLoadErrorOmitsSecretValues(t *testing.T) {
+	const sentinelToken = "sentinel-secret-do-not-leak-9f3a"
+	const sentinelKey = "sentinel-key-do-not-leak-7b1d-not-base64!!!"
+
+	path := writeConfig(t, validConfigYAML)
+	t.Setenv("INTERNAL_SERVICE_TOKEN", sentinelToken)
+	t.Setenv("MASTER_KEY_BASE64", sentinelKey)
+
+	_, err := config.Load(path)
+	if err == nil {
+		t.Fatal("Load() error = nil, want master key error")
+	}
+	message := err.Error()
+	if strings.Contains(message, sentinelToken) {
+		t.Errorf("Load() error leaked internal service token: %q", message)
+	}
+	if strings.Contains(message, sentinelKey) {
+		t.Errorf("Load() error leaked master key: %q", message)
+	}
+}
+
 func writeConfig(t *testing.T, content string) string {
 	t.Helper()
 
@@ -187,5 +243,5 @@ cache_redis:
   db: 1
 security:
   internal_service_token: test-internal-token
-  master_key_base64: dGVzdC1tYXN0ZXIta2V5
+  master_key_base64: MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=
 `

@@ -1,12 +1,15 @@
 package config
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/spf13/viper"
 )
+
+const masterKeyByteLength = 32
 
 type Config struct {
 	Server     ServerConfig   `mapstructure:"server"`
@@ -120,6 +123,13 @@ func (cfg Config) validate() error {
 	}
 	if strings.TrimSpace(cfg.Security.MasterKeyBase64) == "" {
 		return errors.New("security.master_key_base64 is required")
+	}
+	decoded, err := base64.StdEncoding.DecodeString(cfg.Security.MasterKeyBase64)
+	if err != nil {
+		return errors.New("security.master_key_base64 must be valid base64")
+	}
+	if len(decoded) != masterKeyByteLength {
+		return fmt.Errorf("security.master_key_base64 must decode to a %d-byte key", masterKeyByteLength)
 	}
 
 	return nil
