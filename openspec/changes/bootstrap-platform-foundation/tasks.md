@@ -10,7 +10,7 @@
 
 - [x] 2.1 创建 `deploy/docker-compose.yml`、`deploy/postgres/init/01-create-databases.sql`，运行 `docker compose -f deploy/docker-compose.yml config` 验证 Compose
 - [x] 2.2 创建 `migrations/opsweaver_server/`、`migrations/opsweaver_gateway/` 首批版本 SQL 和 `cmd/migrate/main.go`，禁止使用 GORM AutoMigrate
-- [ ] 2.3 在 `internal/platform/database/database_test.go` 编写两个 DSN 独立连接测试，再实现 `internal/platform/database/database.go`
+- [x] 2.3 在 `internal/platform/database/database_test.go` 编写两个 DSN 独立连接测试，再实现 `internal/platform/database/database.go`
 - [ ] 2.4 启动 Compose，分别执行两个数据库迁移并查询迁移版本表，确认空库初始化成功
 - [ ] 2.5 提交基础设施，提交信息 `feat: add local postgres redis infrastructure`
 
