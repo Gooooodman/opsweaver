@@ -2,7 +2,7 @@
 
 - [x] 1.1 创建 `go.mod`（module `github.com/Gooooodman/opsweaver`）、`Makefile`、`.env.example` 和 `cmd/{opsweaver-server,opsweaver-worker,opsweaver-gateway}/main.go`，运行 `go test ./...` 验证三个入口可编译
 - [x] 1.2 先在 `internal/platform/config/config_test.go` 编写有效配置、缺失必填项和环境变量覆盖测试，再实现 `internal/platform/config/config.go`
-- [ ] 1.3 先在 `internal/platform/logging/logging_test.go` 验证 JSON 日志和敏感字段掩码，再实现基于 `slog` 的 `internal/platform/logging/logging.go`
+- [x] 1.3 先在 `internal/platform/logging/logging_test.go` 验证 JSON 日志和敏感字段掩码，再实现基于 `slog` 的 `internal/platform/logging/logging.go`
 - [ ] 1.4 创建 `internal/platform/apperror/error.go`、`internal/platform/httpx/response.go` 及测试，统一英文 API 错误结构 `code/message/trace_id`
 - [ ] 1.5 提交工程骨架，提交信息 `chore: bootstrap Go service structure`
 
