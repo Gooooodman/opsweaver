@@ -48,6 +48,7 @@ func TestLoadRejectsMissingRequiredValue(t *testing.T) {
 		"",
 		1,
 	))
+	t.Setenv("INTERNAL_SERVICE_TOKEN", "")
 
 	_, err := config.Load(path)
 	if err == nil {
@@ -61,8 +62,16 @@ func TestLoadRejectsMissingRequiredValue(t *testing.T) {
 func TestLoadAppliesEnvironmentOverrides(t *testing.T) {
 	path := writeConfig(t, validConfigYAML)
 	t.Setenv("OPSWEAVER_SERVER_PORT", "9090")
+	t.Setenv("OPSWEAVER_WORKER_HEALTH_PORT", "9091")
+	t.Setenv("OPSWEAVER_GATEWAY_PORT", "9092")
 	t.Setenv("OPSWEAVER_SERVER_DATABASE_DSN", "postgres://override/opsweaver_server_db")
+	t.Setenv("OPSWEAVER_GATEWAY_DATABASE_DSN", "postgres://override/opsweaver_gateway_db")
+	t.Setenv("ASYNQ_REDIS_ADDR", "asynq.example:6379")
+	t.Setenv("ASYNQ_REDIS_DB", "0")
+	t.Setenv("CACHE_REDIS_ADDR", "cache.example:6379")
+	t.Setenv("CACHE_REDIS_DB", "1")
 	t.Setenv("INTERNAL_SERVICE_TOKEN", "override-token")
+	t.Setenv("MASTER_KEY_BASE64", base64.StdEncoding.EncodeToString([]byte("0123456789abcdef0123456789abcdef")))
 
 	cfg, err := config.Load(path)
 	if err != nil {
@@ -72,11 +81,109 @@ func TestLoadAppliesEnvironmentOverrides(t *testing.T) {
 	if cfg.Server.Port != 9090 {
 		t.Errorf("Server.Port = %d, want 9090", cfg.Server.Port)
 	}
+	if cfg.Worker.HealthPort != 9091 {
+		t.Errorf("Worker.HealthPort = %d, want 9091", cfg.Worker.HealthPort)
+	}
+	if cfg.Gateway.Port != 9092 {
+		t.Errorf("Gateway.Port = %d, want 9092", cfg.Gateway.Port)
+	}
 	if cfg.Server.Database.DSN != "postgres://override/opsweaver_server_db" {
 		t.Errorf("Server.Database.DSN = %q, want overridden DSN", cfg.Server.Database.DSN)
 	}
+	if cfg.Gateway.Database.DSN != "postgres://override/opsweaver_gateway_db" {
+		t.Errorf("Gateway.Database.DSN = %q, want overridden DSN", cfg.Gateway.Database.DSN)
+	}
+	if cfg.AsynqRedis.Addr != "asynq.example:6379" || cfg.AsynqRedis.DB != 0 {
+		t.Errorf("AsynqRedis = %+v, want overridden address and DB 0", cfg.AsynqRedis)
+	}
+	if cfg.CacheRedis.Addr != "cache.example:6379" || cfg.CacheRedis.DB != 1 {
+		t.Errorf("CacheRedis = %+v, want overridden address and DB 1", cfg.CacheRedis)
+	}
 	if cfg.Security.InternalServiceToken != "override-token" {
 		t.Errorf("Security.InternalServiceToken = %q, want overridden token", cfg.Security.InternalServiceToken)
+	}
+	if cfg.Security.MasterKeyBase64 != base64.StdEncoding.EncodeToString([]byte("0123456789abcdef0123456789abcdef")) {
+		t.Errorf("Security.MasterKeyBase64 was not overridden")
+	}
+}
+
+func TestLoadRejectsSensitiveValuesFromYAMLWithoutEnvironment(t *testing.T) {
+	path := writeConfig(t, validConfigYAML)
+	t.Setenv("INTERNAL_SERVICE_TOKEN", "")
+
+	_, err := config.Load(path)
+	if err == nil {
+		t.Fatal("Load() error = nil, want environment-only secret error")
+	}
+	if !strings.Contains(err.Error(), "security.internal_service_token is required") {
+		t.Fatalf("Load() error = %q, want required token message", err)
+	}
+}
+
+func TestLoadRejectsExplicitEmptyEnvironmentOverride(t *testing.T) {
+	path := writeConfig(t, validConfigYAML)
+	t.Setenv("OPSWEAVER_SERVER_DATABASE_DSN", "")
+
+	_, err := config.Load(path)
+	if err == nil {
+		t.Fatal("Load() error = nil, want empty DSN error")
+	}
+	if !strings.Contains(err.Error(), "server.database.dsn is required") {
+		t.Fatalf("Load() error = %q, want required DSN message", err)
+	}
+}
+
+func TestLoadRejectsUnknownYAMLField(t *testing.T) {
+	path := writeConfig(t, strings.Replace(
+		validConfigYAML,
+		"asynq_redis:\n  addr:",
+		"asynq_redis:\n  typo: true\n  addr:",
+		1,
+	))
+
+	_, err := config.Load(path)
+	if err == nil {
+		t.Fatal("Load() error = nil, want unknown field error")
+	}
+	if !strings.Contains(err.Error(), "typo") {
+		t.Fatalf("Load() error = %q, want unknown field name", err)
+	}
+}
+
+func TestLoadRejectsNonNumericEnvironmentValue(t *testing.T) {
+	path := writeConfig(t, validConfigYAML)
+	t.Setenv("OPSWEAVER_SERVER_PORT", "not-a-number")
+
+	_, err := config.Load(path)
+	if err == nil {
+		t.Fatal("Load() error = nil, want numeric conversion error")
+	}
+	if !strings.Contains(err.Error(), "server.port") {
+		t.Fatalf("Load() error = %q, want server.port context", err)
+	}
+}
+
+func TestLoadReadErrorIncludesConfigPath(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "missing.yaml")
+
+	_, err := config.Load(path)
+	if err == nil {
+		t.Fatal("Load() error = nil, want read error")
+	}
+	if !strings.Contains(err.Error(), path) {
+		t.Fatalf("Load() error = %q, want config path %q", err, path)
+	}
+}
+
+func TestLoadMalformedYAMLErrorIncludesConfigPath(t *testing.T) {
+	path := writeConfig(t, "server: [\n")
+
+	_, err := config.Load(path)
+	if err == nil {
+		t.Fatal("Load() error = nil, want parse error")
+	}
+	if !strings.Contains(err.Error(), path) {
+		t.Fatalf("Load() error = %q, want config path %q", err, path)
 	}
 }
 
@@ -211,17 +318,33 @@ func writeConfig(t *testing.T, content string) string {
 		"ASYNQ_REDIS_DB",
 		"CACHE_REDIS_ADDR",
 		"CACHE_REDIS_DB",
-		"INTERNAL_SERVICE_TOKEN",
-		"MASTER_KEY_BASE64",
 	} {
-		t.Setenv(key, "")
+		unsetEnv(t, key)
 	}
+	t.Setenv("INTERNAL_SERVICE_TOKEN", "test-internal-token")
+	t.Setenv("MASTER_KEY_BASE64", base64.StdEncoding.EncodeToString([]byte("0123456789abcdef0123456789abcdef")))
 
 	path := filepath.Join(t.TempDir(), "config.yaml")
 	if err := os.WriteFile(path, []byte(content), 0o600); err != nil {
 		t.Fatalf("WriteFile() error = %v", err)
 	}
 	return path
+}
+
+func unsetEnv(t *testing.T, key string) {
+	t.Helper()
+
+	value, existed := os.LookupEnv(key)
+	if err := os.Unsetenv(key); err != nil {
+		t.Fatalf("Unsetenv(%q) error = %v", key, err)
+	}
+	t.Cleanup(func() {
+		if existed {
+			_ = os.Setenv(key, value)
+			return
+		}
+		_ = os.Unsetenv(key)
+	})
 }
 
 const validConfigYAML = `

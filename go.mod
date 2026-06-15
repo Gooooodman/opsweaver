@@ -5,6 +5,8 @@ go 1.25
 require (
 	github.com/golang-migrate/migrate/v4 v4.19.1
 	github.com/spf13/viper v1.21.0
+	gorm.io/driver/postgres v1.6.0
+	gorm.io/gorm v1.31.1
 )
 
 require (
@@ -29,6 +31,4 @@ require (
 	golang.org/x/sync v0.18.0 // indirect
 	golang.org/x/sys v0.38.0 // indirect
 	golang.org/x/text v0.31.0 // indirect
-	gorm.io/driver/postgres v1.6.0 // indirect
-	gorm.io/gorm v1.31.1 // indirect
 )

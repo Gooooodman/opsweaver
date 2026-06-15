@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -65,6 +66,7 @@ var environmentBindings = map[string]string{
 func Load(path string) (Config, error) {
 	v := viper.New()
 	v.SetConfigFile(path)
+	v.AllowEmptyEnv(true)
 
 	for key, environmentVariable := range environmentBindings {
 		if err := v.BindEnv(key, environmentVariable); err != nil {
@@ -73,12 +75,17 @@ func Load(path string) (Config, error) {
 	}
 
 	if err := v.ReadInConfig(); err != nil {
-		return Config{}, fmt.Errorf("read config: %w", err)
+		return Config{}, fmt.Errorf("read config %q: %w", path, err)
 	}
 
+	// Secrets are environment-only. Explicitly setting them prevents YAML
+	// values from becoming a fallback when deployment variables are missing.
+	v.Set("security.internal_service_token", os.Getenv("INTERNAL_SERVICE_TOKEN"))
+	v.Set("security.master_key_base64", os.Getenv("MASTER_KEY_BASE64"))
+
 	var cfg Config
-	if err := v.Unmarshal(&cfg); err != nil {
-		return Config{}, fmt.Errorf("decode config: %w", err)
+	if err := v.UnmarshalExact(&cfg); err != nil {
+		return Config{}, fmt.Errorf("decode config %q: %w", path, err)
 	}
 	if err := cfg.validate(); err != nil {
 		return Config{}, fmt.Errorf("validate config: %w", err)
