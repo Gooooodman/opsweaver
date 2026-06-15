@@ -1,0 +1,19 @@
+server:
+  port: 8080
+  database:
+    dsn: ""
+worker:
+  health_port: 8081
+gateway:
+  port: 8082
+  database:
+    dsn: ""
+asynq_redis:
+  addr: localhost:6379
+  db: 0
+cache_redis:
+  addr: localhost:6379
+  db: 1
+security:
+  internal_service_token: ""
+  master_key_base64: ""
