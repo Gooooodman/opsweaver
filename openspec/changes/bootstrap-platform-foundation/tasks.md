@@ -12,14 +12,14 @@
 - [x] 2.2 创建 `migrations/opsweaver_server/`、`migrations/opsweaver_gateway/` 首批版本 SQL 和 `cmd/migrate/main.go`，禁止使用 GORM AutoMigrate
 - [x] 2.3 在 `internal/platform/database/database_test.go` 编写两个 DSN 独立连接测试，再实现 `internal/platform/database/database.go`
 - [x] 2.4 启动 Compose，分别执行两个数据库迁移并查询迁移版本表，确认空库初始化成功
-- [ ] 2.5 提交基础设施，提交信息 `feat: add local postgres redis infrastructure`
+- [x] 2.5 ~~提交基础设施，提交信息 `feat: add local postgres redis infrastructure`~~（已通过 2.1–2.4 各自独立提交等价完成，PR #1 doc 记录）
 
 ## 3. 健康检查与可观测性
 
-- [ ] 3.1 在 `internal/platform/health/health_test.go` 编写 liveness 与 dependency readiness 测试，再实现 `internal/platform/health/health.go`
-- [ ] 3.2 创建 `internal/platform/metrics/metrics.go`，注册 HTTP 请求、依赖状态和 Asynq 处理指标，并补充重复注册测试
-- [ ] 3.3 在三个服务中挂载 `/healthz`、`/readyz`、`/metrics`，运行针对性 HTTP 测试验证状态码和 Prometheus Content-Type
-- [ ] 3.4 提交可观测性，提交信息 `feat: add service health and metrics`
+- [x] 3.1 在 `internal/platform/health/health_test.go` 编写 liveness 与 dependency readiness 测试，再实现 `internal/platform/health/health.go`
+- [x] 3.2 创建 `internal/platform/metrics/metrics.go`，注册 HTTP 请求、依赖状态和 Asynq 处理指标，并补充重复注册测试
+- [x] 3.3 在三个服务中挂载 `/healthz`、`/readyz`、`/metrics`，运行针对性 HTTP 测试验证状态码和 Prometheus Content-Type
+- [x] 3.4 ~~提交可观测性，提交信息 `feat: add service health and metrics`~~（已拆分为 3.1–3.3 各自独立提交：`feat: add health checker` / `feat: add prometheus metrics registry` / `feat: wire health metrics into services`）
 
 ## 4. 内部认证与凭证加密
 
