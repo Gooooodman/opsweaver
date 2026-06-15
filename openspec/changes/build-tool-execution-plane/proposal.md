@@ -27,7 +27,7 @@
 
 ## Impact
 
-- 扩展 `aiops-server` 的 Tool Registry API 和内部 ToolSpec 同步接口。
-- 扩展 `tool-gateway` 的 Invoke API、数据库模型、Repository 和 Adapter。
+- 扩展 `opsweaver-server` 的 Tool Registry API 和内部 ToolSpec 同步接口。
+- 扩展 `opsweaver-gateway` 的 Invoke API、数据库模型、Repository 和 Adapter。
 - 新增 client-go、JSON Schema 校验器及外部 HTTP Client 依赖。
 - 依赖 `bootstrap-platform-foundation` 提供的服务、数据库、配置和内部认证。

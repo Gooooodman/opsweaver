@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: 创建诊断任务并异步入队
-`aiops-server` SHALL 先创建 `pending` 任务，成功入队后更新为 `queued`，并立即向调用方返回 Task ID。
+`opsweaver-server` SHALL 先创建 `pending` 任务，成功入队后更新为 `queued`，并立即向调用方返回 Task ID。
 
 #### Scenario: 入队成功
 - **WHEN** 用户提交合法诊断请求且 Asynq 可用

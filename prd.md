@@ -230,9 +230,9 @@ P0 / P1 阶段建议控制在 3～5 个服务。
 
 | 服务 | P0 是否必须 | 语言 | 职责 |
 |---|---|---|---|
-| aiops-server | 必须 | Go + Gin | API、Orchestrator、Registry、Skill Runtime、Report |
-| tool-gateway | 必须 | Go | Tool 调用、MCP Adapter、Policy 预留、Audit、Evidence |
-| worker | 可选 | Go | 异步任务、长耗时诊断、定时同步 MCP tools |
+| opsweaver-server | 必须 | Go + Gin | API、Orchestrator、Registry、Skill Runtime、Report |
+| opsweaver-gateway | 必须 | Go | Tool 调用、MCP Adapter、Policy 预留、Audit、Evidence |
+| opsweaver-worker | 可选 | Go | 异步任务、长耗时诊断、定时同步 MCP tools |
 | web-ui | P1 | Vue | Chat、任务列表、报告、Registry、Audit 页面 |
 | knowledge-service | P2 | Go | Runbook / SOP / 历史故障检索 |
 
@@ -241,8 +241,8 @@ P0 / P1 阶段建议控制在 3～5 个服务。
 P0 可以先部署为：
 
 ```text
-aiops-server
-tool-gateway
+opsweaver-server
+opsweaver-gateway
 PostgreSQL
 Redis
 ```
@@ -250,14 +250,14 @@ Redis
 其中：
 
 ```text
-aiops-server 内置：
+opsweaver-server 内置：
   - API
   - Orchestrator
   - Registry
   - Skill Runtime
   - Report Builder
 
-tool-gateway 内置：
+opsweaver-gateway 内置：
   - Tool Registry Cache
   - Built-in Tool Adapter
   - MCP Adapter
@@ -293,7 +293,7 @@ policy-service
                  └─────────┬──────────┘
                            │
                  ┌─────────▼──────────┐
-                 │    aiops-server     │
+                 │    opsweaver-server     │
                  │ Gin API             │
                  │ Orchestrator        │
                  │ Registry            │
@@ -302,7 +302,7 @@ policy-service
                  └─────────┬──────────┘
                            │
                  ┌─────────▼──────────┐
-                 │    tool-gateway     │
+                 │    opsweaver-gateway     │
                  │ Tool Invoke         │
                  │ Built-in Adapter    │
                  │ MCP Adapter         │
@@ -1615,8 +1615,8 @@ expired
 
 ```text
 1. Go module 初始化。
-2. Gin aiops-server。
-3. tool-gateway。
+2. Gin opsweaver-server。
+3. opsweaver-gateway。
 4. PostgreSQL。
 5. Redis。
 6. Docker Compose。
@@ -1886,7 +1886,7 @@ Tool Gateway 可调用
 验收标准：
 
 ```text
-新增 MCP Server 不需要修改 aiops-server / tool-gateway 代码。
+新增 MCP Server 不需要修改 opsweaver-server / opsweaver-gateway 代码。
 ```
 
 ---
@@ -2108,11 +2108,11 @@ engineering-copilot/
 ├── .gitignore
 │
 ├── cmd/
-│   ├── aiops-server/
+│   ├── opsweaver-server/
 │   │   └── main.go
-│   ├── tool-gateway/
+│   ├── opsweaver-gateway/
 │   │   └── main.go
-│   └── worker/
+│   └── opsweaver-worker/
 │       └── main.go
 │
 ├── internal/

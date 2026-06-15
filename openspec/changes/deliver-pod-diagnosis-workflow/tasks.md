@@ -1,7 +1,7 @@
 ## 1. Task 数据模型与 API
 
 - [ ] 1.1 定义 `internal/domain/task/task.go` 状态机，在测试中覆盖合法转换和非法回退
-- [ ] 1.2 创建 `migrations/aiops/0005_tasks_reports.up.sql` 与 down migration，增加 Task、Report、步骤状态和必要唯一约束
+- [ ] 1.2 创建 `migrations/opsweaver_server/0005_tasks_reports.up.sql` 与 down migration，增加 Task、Report、步骤状态和必要唯一约束
 - [ ] 1.3 在 `internal/task/service_test.go` 编写先建 pending、入队成功 queued、入队失败 failed 测试，再实现创建服务
 - [ ] 1.4 创建 Task 创建、详情、Report 查询 Handler 和 OpenAPI 定义，补充异步 202 响应 Contract 测试
 - [ ] 1.5 提交 Task API，提交信息 `feat: add asynchronous diagnosis tasks`

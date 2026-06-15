@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: 三个服务可独立启动
-系统 SHALL 提供 `aiops-server`、`worker`、`tool-gateway` 三个独立入口，并从统一配置结构加载各自所需配置。
+系统 SHALL 提供 `opsweaver-server`、`opsweaver-worker`、`opsweaver-gateway` 三个独立入口，并从统一配置结构加载各自所需配置。
 
 #### Scenario: 使用有效配置启动
 - **WHEN** 操作者使用完整有效的配置启动任一服务

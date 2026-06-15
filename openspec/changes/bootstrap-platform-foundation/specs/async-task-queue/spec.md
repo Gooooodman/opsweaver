@@ -1,10 +1,10 @@
 ## ADDED Requirements
 
 ### Requirement: Asynq 职责分离
-`aiops-server` SHALL 使用 Asynq Client 入队，`worker` SHALL 运行 Asynq Server 消费任务，`tool-gateway` MUST NOT 依赖 Asynq。
+`opsweaver-server` SHALL 使用 Asynq Client 入队，`opsweaver-worker` SHALL 运行 Asynq Server 消费任务，`opsweaver-gateway` MUST NOT 依赖 Asynq。
 
 #### Scenario: 提交任务
-- **WHEN** `aiops-server` 提交有效任务
+- **WHEN** `opsweaver-server` 提交有效任务
 - **THEN** 任务进入配置队列并可被 Worker 消费
 
 ### Requirement: 队列与缓存隔离

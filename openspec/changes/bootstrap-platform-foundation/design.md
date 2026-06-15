@@ -8,7 +8,7 @@
 
 - 三个 Go 服务可独立启动、观测和测试。
 - 本地通过 Docker Compose 一键启动 PostgreSQL 与 Redis。
-- `aiops_db` 与 `tool_gateway_db` 使用独立连接和迁移。
+- `opsweaver_server_db` 与 `opsweaver_gateway_db` 使用独立连接和迁移。
 - Asynq Client/Server 职责清晰，队列与缓存逻辑隔离。
 - 内部 HTTP API 和敏感凭证具备 P0 安全基线。
 
@@ -34,7 +34,7 @@ GORM 用于 Repository 映射和查询，迁移由独立命令按目录执行，
 
 ### 决策 4：Asynq 部署职责
 
-`aiops-server` 持有 Asynq Client，`worker` 运行 Asynq Server，`tool-gateway` 不引入 Asynq。Redis DB 0 用于 Asynq，DB 1 用于状态与健康缓存。生产允许配置独立 Endpoint。
+`opsweaver-server` 持有 Asynq Client，`opsweaver-worker` 运行 Asynq Server，`opsweaver-gateway` 不引入 Asynq。Redis DB 0 用于 Asynq，DB 1 用于状态与健康缓存。生产允许配置独立 Endpoint。
 
 ### 决策 5：配置与错误模型
 

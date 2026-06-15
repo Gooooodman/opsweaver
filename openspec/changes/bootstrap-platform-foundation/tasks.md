@@ -1,17 +1,17 @@
 ## 1. 工程骨架与配置
 
-- [ ] 1.1 创建 `go.mod`（module `github.com/Gooooodman/opsweaver`）、`Makefile`、`.env.example` 和 `cmd/{aiops-server,worker,tool-gateway}/main.go`，运行 `go test ./...` 验证三个入口可编译
-- [ ] 1.2 先在 `internal/platform/config/config_test.go` 编写有效配置、缺失必填项和环境变量覆盖测试，再实现 `internal/platform/config/config.go`
-- [ ] 1.3 先在 `internal/platform/logging/logging_test.go` 验证 JSON 日志和敏感字段掩码，再实现基于 `slog` 的 `internal/platform/logging/logging.go`
-- [ ] 1.4 创建 `internal/platform/apperror/error.go`、`internal/platform/httpx/response.go` 及测试，统一英文 API 错误结构 `code/message/trace_id`
-- [ ] 1.5 提交工程骨架，提交信息 `chore: bootstrap Go service structure`
+- [x] 1.1 创建 `go.mod`（module `github.com/Gooooodman/opsweaver`）、`Makefile`、`.env.example` 和 `cmd/{opsweaver-server,opsweaver-worker,opsweaver-gateway}/main.go`，运行 `go test ./...` 验证三个入口可编译
+- [x] 1.2 先在 `internal/platform/config/config_test.go` 编写有效配置、缺失必填项和环境变量覆盖测试，再实现 `internal/platform/config/config.go`
+- [x] 1.3 先在 `internal/platform/logging/logging_test.go` 验证 JSON 日志和敏感字段掩码，再实现基于 `slog` 的 `internal/platform/logging/logging.go`
+- [x] 1.4 创建 `internal/platform/apperror/error.go`、`internal/platform/httpx/response.go` 及测试，统一英文 API 错误结构 `code/message/trace_id`
+- [x] 1.5 ~~提交工程骨架，提交信息 `chore: bootstrap Go service structure`~~（已拆分为 1.1–1.4 各自独立提交：`chore: bootstrap Go service structure` / `feat: add validated application config` / `feat: validate master key length and redact secrets` / `feat: add structured logging` / `feat: add unified error response`）
 
 ## 2. 本地基础设施与迁移
 
-- [ ] 2.1 创建 `deploy/docker-compose.yml`、`deploy/postgres/init/01-create-databases.sql`，运行 `docker compose -f deploy/docker-compose.yml config` 验证 Compose
-- [ ] 2.2 创建 `migrations/aiops/`、`migrations/tool_gateway/` 首批版本 SQL 和 `cmd/migrate/main.go`，禁止使用 GORM AutoMigrate
-- [ ] 2.3 在 `internal/platform/database/database_test.go` 编写两个 DSN 独立连接测试，再实现 `internal/platform/database/database.go`
-- [ ] 2.4 启动 Compose，分别执行两个数据库迁移并查询迁移版本表，确认空库初始化成功
+- [x] 2.1 创建 `deploy/docker-compose.yml`、`deploy/postgres/init/01-create-databases.sql`，运行 `docker compose -f deploy/docker-compose.yml config` 验证 Compose
+- [x] 2.2 创建 `migrations/opsweaver_server/`、`migrations/opsweaver_gateway/` 首批版本 SQL 和 `cmd/migrate/main.go`，禁止使用 GORM AutoMigrate
+- [x] 2.3 在 `internal/platform/database/database_test.go` 编写两个 DSN 独立连接测试，再实现 `internal/platform/database/database.go`
+- [x] 2.4 启动 Compose，分别执行两个数据库迁移并查询迁移版本表，确认空库初始化成功
 - [ ] 2.5 提交基础设施，提交信息 `feat: add local postgres redis infrastructure`
 
 ## 3. 健康检查与可观测性
@@ -34,7 +34,7 @@
 - [ ] 5.1 在 `internal/platform/redisx/client_test.go` 验证 Asynq 使用 DB 0、缓存使用 DB 1，再实现 Redis Client 工厂
 - [ ] 5.2 创建 `internal/queue/types.go`、`internal/queue/client.go`、`internal/queue/server.go`，定义诊断与 MCP 同步任务类型
 - [ ] 5.3 在 `internal/queue/retry_test.go` 编写临时错误三次指数退避和永久错误不重试测试，再实现错误分类与 Asynq Options
-- [ ] 5.4 将 Asynq Client 装配到 `aiops-server`，将 Asynq Server 与健康端口装配到 `worker`，确认 `tool-gateway` 无 Asynq 依赖
+- [ ] 5.4 将 Asynq Client 装配到 `opsweaver-server`，将 Asynq Server 与健康端口装配到 `opsweaver-worker`，确认 `opsweaver-gateway` 无 Asynq 依赖
 - [ ] 5.5 使用 Compose 运行最小入队/消费集成测试并提交，提交信息 `feat: add asynq task queue foundation`
 
 ## 6. Change 验证

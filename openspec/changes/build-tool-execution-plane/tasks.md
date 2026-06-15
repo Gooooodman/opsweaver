@@ -1,7 +1,7 @@
 ## 1. Tool Registry 数据与契约
 
 - [ ] 1.1 在 `internal/domain/tool/spec_test.go` 编写 ToolSpec、RiskLevel、Scope 和不可变版本校验测试，再实现 `internal/domain/tool/spec.go`
-- [ ] 1.2 创建 `migrations/aiops/0002_tools.up.sql` 与 down migration，加入 `name/version` 唯一约束和默认版本约束
+- [ ] 1.2 创建 `migrations/opsweaver_server/0002_tools.up.sql` 与 down migration，加入 `name/version` 唯一约束和默认版本约束
 - [ ] 1.3 在 `internal/registry/tool/repository_test.go` 编写注册、冲突、启停和默认版本测试，再实现 GORM Repository
 - [ ] 1.4 在 `internal/registry/tool/service_test.go` 编写业务校验测试，再实现注册、列表、详情、启停服务
 - [ ] 1.5 创建 `internal/api/tool/handler.go`、路由和 OpenAPI 定义，运行 Handler 测试验证英文错误响应
@@ -11,7 +11,7 @@
 
 - [ ] 2.1 创建 `internal/toolgateway/contract.go`，定义 InvokeRequest、InvokeContext、InvokeResult、Adapter 和 ToolSpecProvider 接口及 JSON Contract 测试
 - [ ] 2.2 在 `internal/toolgateway/validator_test.go` 编写 Tool 启用、JSON Schema、Scope 和只读风险测试，再实现 Validator
-- [ ] 2.3 创建 `migrations/tool_gateway/0001_tool_execution.up.sql`，定义 tool_calls、evidences、audit_logs 和幂等唯一索引
+- [ ] 2.3 创建 `migrations/opsweaver_gateway/0001_tool_execution.up.sql`，定义 tool_calls、evidences、audit_logs 和幂等唯一索引
 - [ ] 2.4 在 `internal/toolgateway/store/store_test.go` 编写 running 创建、成功提交、失败提交和重复幂等测试，再实现事务 Store
 - [ ] 2.5 在 `internal/toolgateway/service_test.go` 使用 Fake Adapter 编写成功、策略拒绝、参数失败、超时和重复调用测试，再实现调用编排
 - [ ] 2.6 创建 `internal/api/internal/toolinvoke/handler.go`，挂载服务令牌中间件并补充 HTTP Contract 测试
@@ -37,7 +37,7 @@
 
 ## 5. ToolSpec 同步与集成
 
-- [ ] 5.1 创建 `aiops-server` 的版本化内部 ToolSpec 导出接口与 `tool-gateway` 同步 Client，补充校验和与缺失版本测试
+- [ ] 5.1 创建 `opsweaver-server` 的版本化内部 ToolSpec 导出接口与 `opsweaver-gateway` 同步 Client，补充校验和与缺失版本测试
 - [ ] 5.2 在 Tool Gateway 启动时加载 ToolSpec 缓存，Invoke 指定未知版本时拒绝而不回退
 - [ ] 5.3 使用双数据库和模拟外部服务运行 Registry-to-Gateway 集成测试
 - [ ] 5.4 运行 `go test ./...`、`go vet ./...` 和 `openspec validate build-tool-execution-plane --strict --no-interactive`
