@@ -4,7 +4,7 @@
 - [x] 1.2 先在 `internal/platform/config/config_test.go` 编写有效配置、缺失必填项和环境变量覆盖测试，再实现 `internal/platform/config/config.go`
 - [x] 1.3 先在 `internal/platform/logging/logging_test.go` 验证 JSON 日志和敏感字段掩码，再实现基于 `slog` 的 `internal/platform/logging/logging.go`
 - [x] 1.4 创建 `internal/platform/apperror/error.go`、`internal/platform/httpx/response.go` 及测试，统一英文 API 错误结构 `code/message/trace_id`
-- [ ] 1.5 提交工程骨架，提交信息 `chore: bootstrap Go service structure`
+- [x] 1.5 ~~提交工程骨架，提交信息 `chore: bootstrap Go service structure`~~（已拆分为 1.1–1.4 各自独立提交：`chore: bootstrap Go service structure` / `feat: add validated application config` / `feat: validate master key length and redact secrets` / `feat: add structured logging` / `feat: add unified error response`）
 
 ## 2. 本地基础设施与迁移
 
