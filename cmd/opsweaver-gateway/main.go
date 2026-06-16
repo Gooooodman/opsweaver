@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"fmt"
 	"log/slog"
@@ -17,6 +16,7 @@ import (
 	"github.com/Gooooodman/opsweaver/internal/platform/health"
 	"github.com/Gooooodman/opsweaver/internal/platform/logging"
 	"github.com/Gooooodman/opsweaver/internal/platform/metrics"
+	"github.com/Gooooodman/opsweaver/internal/platform/servicehttp"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -68,7 +68,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	checker := health.New(health.Options{Timeout: probeTimeout})
+	checker := health.New(health.Options{
+		Timeout:          probeTimeout,
+		RecordDependency: m.RecordDependency,
+	})
 	checker.Register("postgres", func(ctx context.Context) error {
 		sqlDB, derr := db.DB()
 		if derr != nil {
@@ -78,8 +81,8 @@ func main() {
 	})
 
 	mux := http.NewServeMux()
-	mux.Handle("/healthz", checker.LiveHandler())
-	mux.Handle("/readyz", checker.ReadyHandler())
+	mux.Handle("/healthz", m.Middleware("/healthz", checker.LiveHandler()))
+	mux.Handle("/readyz", m.Middleware("/readyz", checker.ReadyHandler()))
 	mux.Handle("/metrics", m.Handler())
 
 	srv := &http.Server{
@@ -88,27 +91,10 @@ func main() {
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 
-	serverErr := make(chan error, 1)
-	go func() {
-		logger.Info("http server listening", "port", cfg.Gateway.Port)
-		if lerr := srv.ListenAndServe(); lerr != nil && !errors.Is(lerr, http.ErrServerClosed) {
-			serverErr <- lerr
-		}
-		close(serverErr)
-	}()
-
-	select {
-	case <-ctx.Done():
-		logger.Info("shutdown signal received")
-	case lerr, ok := <-serverErr:
-		if ok && lerr != nil {
-			logger.Error("http server failed", "error", lerr.Error())
-		}
+	logger.Info("http server listening", "port", cfg.Gateway.Port)
+	if err := servicehttp.Serve(ctx, srv, shutdownTimeout); err != nil {
+		logger.Error("http server failed", "error", err.Error())
+		os.Exit(1)
 	}
-
-	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), shutdownTimeout)
-	defer shutdownCancel()
-	if serr := srv.Shutdown(shutdownCtx); serr != nil {
-		logger.Error("http server shutdown", "error", serr.Error())
-	}
+	logger.Info("shutdown signal received")
 }

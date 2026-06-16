@@ -133,6 +133,50 @@ func TestHandler_ExposesConstantServiceLabel(t *testing.T) {
 	}
 }
 
+func TestMiddleware_RecordsHTTPRequestMetrics(t *testing.T) {
+	m, err := metrics.New(metrics.Options{Namespace: "opsweaver", Service: "opsweaver-server"}, prometheus.NewRegistry())
+	if err != nil {
+		t.Fatalf("New returned error: %v", err)
+	}
+	next := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusCreated)
+	})
+
+	req := httptest.NewRequest(http.MethodPost, "/healthz", nil)
+	rec := httptest.NewRecorder()
+	m.Middleware("/healthz", next).ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusCreated {
+		t.Fatalf("status: got %d, want 201", rec.Code)
+	}
+	body := renderHandler(t, m.Handler())
+	if !strings.Contains(body, `opsweaver_http_requests_total{method="POST",route="/healthz",service="opsweaver-server",status="201"} 1`) {
+		t.Fatalf("metrics missing request counter\nbody:\n%s", body)
+	}
+	if !strings.Contains(body, `opsweaver_http_request_duration_seconds_count{method="POST",route="/healthz",service="opsweaver-server"} 1`) {
+		t.Fatalf("metrics missing request duration count\nbody:\n%s", body)
+	}
+}
+
+func TestRecordDependency_UpdatesDependencyGauge(t *testing.T) {
+	m, err := metrics.New(metrics.Options{Namespace: "opsweaver", Service: "opsweaver-server"}, prometheus.NewRegistry())
+	if err != nil {
+		t.Fatalf("New returned error: %v", err)
+	}
+
+	m.RecordDependency("postgres", true)
+	body := renderHandler(t, m.Handler())
+	if !strings.Contains(body, `opsweaver_dependency_up{dependency="postgres",service="opsweaver-server"} 1`) {
+		t.Fatalf("metrics missing dependency up gauge\nbody:\n%s", body)
+	}
+
+	m.RecordDependency("postgres", false)
+	body = renderHandler(t, m.Handler())
+	if !strings.Contains(body, `opsweaver_dependency_up{dependency="postgres",service="opsweaver-server"} 0`) {
+		t.Fatalf("metrics missing dependency down gauge\nbody:\n%s", body)
+	}
+}
+
 func TestNew_SeparateRegistriesAreIndependent(t *testing.T) {
 	regA := prometheus.NewRegistry()
 	regB := prometheus.NewRegistry()

@@ -155,6 +155,62 @@ func TestReadyHandler_Timeout(t *testing.T) {
 	}
 }
 
+func TestReadyHandler_TimeoutWhenProbeIgnoresContext(t *testing.T) {
+	c := health.New(health.Options{Timeout: 50 * time.Millisecond})
+	c.Register("stuck", func(ctx context.Context) error {
+		select {}
+	})
+
+	srv := httptest.NewServer(c.ReadyHandler())
+	defer srv.Close()
+
+	client := http.Client{Timeout: time.Second}
+	start := time.Now()
+	resp, err := client.Get(srv.URL)
+	if err != nil {
+		t.Fatalf("get: %v", err)
+	}
+	elapsed := time.Since(start)
+	body := readBody(t, resp.Body)
+
+	if resp.StatusCode != http.StatusServiceUnavailable {
+		t.Fatalf("status: got %d, want 503", resp.StatusCode)
+	}
+	if elapsed > 500*time.Millisecond {
+		t.Fatalf("elapsed too long: got %v, want < 500ms (handler must enforce timeout)", elapsed)
+	}
+	if !strings.Contains(body, `"name":"stuck"`) || !strings.Contains(body, `"status":"down"`) {
+		t.Fatalf("body: got %s, want stuck dependency marked down", body)
+	}
+}
+
+func TestReadyHandler_ReportsDependencyStatus(t *testing.T) {
+	seen := map[string]bool{}
+	c := health.New(health.Options{
+		RecordDependency: func(name string, up bool) {
+			seen[name] = up
+		},
+	})
+	c.Register("postgres", func(ctx context.Context) error { return nil })
+	c.Register("redis", func(ctx context.Context) error { return errors.New("down") })
+
+	srv := httptest.NewServer(c.ReadyHandler())
+	defer srv.Close()
+
+	resp, err := http.Get(srv.URL)
+	if err != nil {
+		t.Fatalf("get: %v", err)
+	}
+	resp.Body.Close()
+
+	if seen["postgres"] != true {
+		t.Fatalf("postgres metric status: got %v, want true", seen["postgres"])
+	}
+	if seen["redis"] != false {
+		t.Fatalf("redis metric status: got %v, want false", seen["redis"])
+	}
+}
+
 func TestReadyHandler_Parallel(t *testing.T) {
 	c := health.New(health.Options{Timeout: time.Second})
 	c.Register("a", func(ctx context.Context) error {

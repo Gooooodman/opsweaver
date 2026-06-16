@@ -8,6 +8,8 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -135,4 +137,36 @@ func New(opts Options, reg *prometheus.Registry) (*Metrics, error) {
 // this Metrics instance's gatherer.
 func (m *Metrics) Handler() http.Handler {
 	return promhttp.HandlerFor(m.gatherer, promhttp.HandlerOpts{})
+}
+
+func (m *Metrics) Middleware(route string, next http.Handler) http.Handler {
+	if route == "" {
+		route = "unknown"
+	}
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		rec := &statusRecorder{ResponseWriter: w, status: http.StatusOK}
+		start := time.Now()
+		next.ServeHTTP(rec, r)
+		status := strconv.Itoa(rec.status)
+		m.HTTPRequestsTotal.WithLabelValues(r.Method, route, status).Inc()
+		m.HTTPRequestDuration.WithLabelValues(r.Method, route).Observe(time.Since(start).Seconds())
+	})
+}
+
+func (m *Metrics) RecordDependency(name string, up bool) {
+	value := 0.0
+	if up {
+		value = 1
+	}
+	m.DependencyUp.WithLabelValues(name).Set(value)
+}
+
+type statusRecorder struct {
+	http.ResponseWriter
+	status int
+}
+
+func (r *statusRecorder) WriteHeader(status int) {
+	r.status = status
+	r.ResponseWriter.WriteHeader(status)
 }

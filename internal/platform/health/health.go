@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"sort"
-	"sync"
 	"time"
 )
 
@@ -20,7 +19,8 @@ type CheckFunc func(ctx context.Context) error
 
 // Options configures a Checker. All fields are optional.
 type Options struct {
-	Timeout time.Duration
+	Timeout          time.Duration
+	RecordDependency func(name string, up bool)
 }
 
 // Checker registers named dependency probes and serves liveness and readiness
@@ -31,6 +31,7 @@ type Checker struct {
 	timeout time.Duration
 	names   []string
 	checks  map[string]CheckFunc
+	record  func(name string, up bool)
 }
 
 func New(opts Options) *Checker {
@@ -41,6 +42,7 @@ func New(opts Options) *Checker {
 	return &Checker{
 		timeout: timeout,
 		checks:  make(map[string]CheckFunc),
+		record:  opts.RecordDependency,
 	}
 }
 
@@ -73,20 +75,32 @@ func (c *Checker) ReadyHandler() http.Handler {
 		defer cancel()
 
 		results := make([]checkResult, len(c.names))
-		var wg sync.WaitGroup
+		resultCh := make(chan checkResult, len(c.names))
 		for i, name := range c.names {
-			wg.Add(1)
-			go func(idx int, n string, fn CheckFunc) {
-				defer wg.Done()
+			results[i] = checkResult{Name: name, Status: "down"}
+			go func(n string, fn CheckFunc) {
 				status := "ok"
 				if err := fn(ctx); err != nil {
 					status = "down"
 				}
-				results[idx] = checkResult{Name: n, Status: status}
-			}(i, name, c.checks[name])
+				resultCh <- checkResult{Name: n, Status: status}
+			}(name, c.checks[name])
 		}
-		wg.Wait()
 
+		byName := make(map[string]int, len(results))
+		for i, result := range results {
+			byName[result.Name] = i
+		}
+		for range c.names {
+			select {
+			case result := <-resultCh:
+				results[byName[result.Name]] = result
+			case <-ctx.Done():
+				goto ready
+			}
+		}
+
+	ready:
 		sort.Slice(results, func(i, j int) bool {
 			return results[i].Name < results[j].Name
 		})
@@ -98,6 +112,11 @@ func (c *Checker) ReadyHandler() http.Handler {
 				overall = "degraded"
 				code = http.StatusServiceUnavailable
 				break
+			}
+		}
+		for _, result := range results {
+			if c.record != nil {
+				c.record(result.Name, result.Status == "ok")
 			}
 		}
 
