@@ -25,9 +25,9 @@
 
 - [x] 4.1 在 `internal/platform/auth/service_token_test.go` 编写正确、缺失、错误令牌测试，再实现常量时间比较中间件
 - [x] 4.2 在 `internal/platform/crypto/aesgcm_test.go` 编写 round-trip、随机 Nonce、非法密钥和篡改密文测试，再实现版本化 AES-256-GCM 密文封装
-- [ ] 4.3 在 `internal/platform/mask/mask_test.go` 编写 token/password/authorization/secret 递归脱敏测试，再实现 `internal/platform/mask/mask.go`
-- [ ] 4.4 将主密钥和内部令牌接入配置校验，验证启动错误和日志均不包含秘密
-- [ ] 4.5 提交安全基线，提交信息 `feat: add internal auth and credential encryption`
+- [x] 4.3 在 `internal/platform/mask/mask_test.go` 编写 token/password/authorization/secret 递归脱敏测试，再实现 `internal/platform/mask/mask.go`
+- [x] 4.4 将主密钥和内部令牌接入配置校验，验证启动错误和日志均不包含秘密
+- [ ] 4.5 ~~提交安全基线，提交信息 `feat: add internal auth and credential encryption`~~（已拆分为 4.1–4.4 各自独立提交：`feat: add internal service token auth` / `feat: add credential encryption envelope` / `feat: add recursive secret masking` / `feat: wire security validation into startup path`）
 
 ## 5. Redis 与 Asynq
 
