@@ -17,6 +17,8 @@ import (
 	"github.com/Gooooodman/opsweaver/internal/platform/health"
 	"github.com/Gooooodman/opsweaver/internal/platform/logging"
 	"github.com/Gooooodman/opsweaver/internal/platform/metrics"
+	"github.com/Gooooodman/opsweaver/internal/platform/redisx"
+	"github.com/Gooooodman/opsweaver/internal/queue"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -25,6 +27,14 @@ const (
 	shutdownTimeout = 10 * time.Second
 	probeTimeout    = 2 * time.Second
 )
+
+func newQueueClient(cfg config.RedisConfig) (*queue.Client, error) {
+	connOpt, err := redisx.AsynqConnOpts(cfg)
+	if err != nil {
+		return nil, fmt.Errorf("create asynq connection options: %w", err)
+	}
+	return queue.NewClient(connOpt)
+}
 
 func main() {
 	configPath := flag.String("config", "./config.yaml", "path to config file")
@@ -56,6 +66,17 @@ func main() {
 	defer func() {
 		if cerr := database.Close(db); cerr != nil {
 			logger.Error("close database", "error", cerr.Error())
+		}
+	}()
+
+	queueClient, err := newQueueClient(cfg.AsynqRedis)
+	if err != nil {
+		logger.Error("init queue client", "error", err.Error())
+		os.Exit(1)
+	}
+	defer func() {
+		if cerr := queueClient.Close(); cerr != nil {
+			logger.Error("close queue client", "error", cerr.Error())
 		}
 	}()
 

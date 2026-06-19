@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/Gooooodman/opsweaver/internal/queue/retry"
 	"github.com/hibiken/asynq"
 )
 
@@ -15,16 +16,16 @@ import (
 const maxRetries = 3
 
 // DefaultServerConfig returns the asynq server config that opsweaver-worker
-// uses. It encodes the controlled-retry policy at the queue level so a server
-// created without going through NewServer still honours it.
+// uses. It encodes the controlled-retry policy (exponential backoff, permanent
+// errors skipped) at the queue level via retry.ApplyPolicy.
 func DefaultServerConfig() asynq.Config {
-	return asynq.Config{
+	cfg := asynq.Config{
 		Queues: map[string]int{
 			QueueDefault: 1,
 		},
-		// RetryDelayFunc and IsFailure are wired by the retry subpackage
-		// (WithRetryPolicy) to keep this file free of retry internals.
 	}
+	retry.ApplyPolicy(&cfg)
+	return cfg
 }
 
 // DiagnosisHandler handles TypeDiagnosisRun tasks.
@@ -76,9 +77,9 @@ func (s *Server) HandleMCPSyncTools(h MCPHandler) {
 	})
 }
 
-// Start begins processing registered task types. It blocks the caller until
-// Shutdown is invoked (mirroring asynq.Server semantics); callers typically run
-// it in its own goroutine.
+// Start begins processing registered task types and returns after the worker
+// goroutines start. Callers must keep the process alive and invoke Shutdown
+// during graceful termination.
 func (s *Server) Start() error {
 	if err := s.server.Start(s.mux); err != nil {
 		return fmt.Errorf("queue: start server: %w", err)
