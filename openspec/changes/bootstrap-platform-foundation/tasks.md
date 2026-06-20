@@ -27,19 +27,19 @@
 - [x] 4.2 在 `internal/platform/crypto/aesgcm_test.go` 编写 round-trip、随机 Nonce、非法密钥和篡改密文测试，再实现版本化 AES-256-GCM 密文封装
 - [x] 4.3 在 `internal/platform/mask/mask_test.go` 编写 token/password/authorization/secret 递归脱敏测试，再实现 `internal/platform/mask/mask.go`
 - [x] 4.4 将主密钥和内部令牌接入配置校验，验证启动错误和日志均不包含秘密
-- [ ] 4.5 ~~提交安全基线，提交信息 `feat: add internal auth and credential encryption`~~（已拆分为 4.1–4.4 各自独立提交：`feat: add internal service token auth` / `feat: add credential encryption envelope` / `feat: add recursive secret masking` / `feat: wire security validation into startup path`）
+- [x] 4.5 ~~提交安全基线，提交信息 `feat: add internal auth and credential encryption`~~（已拆分为 4.1–4.4 各自独立提交：`feat: add internal service token auth` / `feat: add credential encryption envelope` / `feat: add recursive secret masking` / `feat: wire security validation into startup path`）
 
 ## 5. Redis 与 Asynq
 
-- [ ] 5.1 在 `internal/platform/redisx/client_test.go` 验证 Asynq 使用 DB 0、缓存使用 DB 1，再实现 Redis Client 工厂
-- [ ] 5.2 创建 `internal/queue/types.go`、`internal/queue/client.go`、`internal/queue/server.go`，定义诊断与 MCP 同步任务类型
-- [ ] 5.3 在 `internal/queue/retry_test.go` 编写临时错误三次指数退避和永久错误不重试测试，再实现错误分类与 Asynq Options
-- [ ] 5.4 将 Asynq Client 装配到 `opsweaver-server`，将 Asynq Server 与健康端口装配到 `opsweaver-worker`，确认 `opsweaver-gateway` 无 Asynq 依赖
-- [ ] 5.5 使用 Compose 运行最小入队/消费集成测试并提交，提交信息 `feat: add asynq task queue foundation`
+- [x] 5.1 在 `internal/platform/redisx/client_test.go` 验证 Asynq 使用 DB 0、缓存使用 DB 1，再实现 Redis Client 工厂
+- [x] 5.2 创建 `internal/queue/types.go`、`internal/queue/client.go`、`internal/queue/server.go`，定义诊断与 MCP 同步任务类型
+- [x] 5.3 在 `internal/queue/retry_test.go` 编写临时错误三次指数退避和永久错误不重试测试，再实现错误分类与 Asynq Options
+- [x] 5.4 将 Asynq Client 装配到 `opsweaver-server`，将 Asynq Server 与健康端口装配到 `opsweaver-worker`，确认 `opsweaver-gateway` 无 Asynq 依赖
+- [x] 5.5 使用 Compose 运行最小入队/消费集成测试并提交，提交信息 `feat: add asynq task queue foundation`
 
 ## 6. Change 验证
 
-- [ ] 6.1 运行 `go test ./...` 和 `go vet ./...`，修复所有失败
-- [ ] 6.2 运行 `docker compose -f deploy/docker-compose.yml up -d --wait`，验证两个数据库、Redis 和三个服务的 health/ready/metrics
-- [ ] 6.3 更新 README 的本地启动、迁移、环境变量和停止命令
-- [ ] 6.4 运行 `openspec validate bootstrap-platform-foundation --strict --no-interactive`
+- [x] 6.1 运行 `go test ./...` 和 `go vet ./...`，修复所有失败
+- [x] 6.2 运行 `docker compose -f deploy/docker-compose.yml up -d --wait`，验证两个数据库、Redis 和三个服务的 health/ready/metrics
+- [x] 6.3 更新 README 的本地启动、迁移、环境变量和停止命令
+- [x] 6.4 运行 `openspec validate bootstrap-platform-foundation --strict --no-interactive`

@@ -16,6 +16,8 @@ import (
 	"github.com/Gooooodman/opsweaver/internal/platform/health"
 	"github.com/Gooooodman/opsweaver/internal/platform/logging"
 	"github.com/Gooooodman/opsweaver/internal/platform/metrics"
+	"github.com/Gooooodman/opsweaver/internal/platform/redisx"
+	"github.com/Gooooodman/opsweaver/internal/queue"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -24,6 +26,14 @@ const (
 	shutdownTimeout = 10 * time.Second
 	probeTimeout    = 2 * time.Second
 )
+
+func newQueueServer(cfg config.RedisConfig) (*queue.Server, error) {
+	connOpt, err := redisx.AsynqConnOpts(cfg)
+	if err != nil {
+		return nil, fmt.Errorf("create asynq connection options: %w", err)
+	}
+	return queue.NewServer(connOpt, queue.DefaultServerConfig())
+}
 
 func main() {
 	configPath := flag.String("config", "./config.yaml", "path to config file")
@@ -43,6 +53,16 @@ func main() {
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
+
+	queueServer, err := newQueueServer(cfg.AsynqRedis)
+	if err != nil {
+		logger.Error("init queue server", "error", err.Error())
+		os.Exit(1)
+	}
+	if err := queueServer.Start(); err != nil {
+		logger.Error("start queue server", "error", err.Error())
+		os.Exit(1)
+	}
 
 	m, err := metrics.New(metrics.Options{
 		Namespace: "opsweaver",
@@ -66,23 +86,25 @@ func main() {
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 
-	serverErr := make(chan error, 1)
+	healthErr := make(chan error, 1)
 	go func() {
 		logger.Info("health server listening", "port", cfg.Worker.HealthPort)
 		if lerr := srv.ListenAndServe(); lerr != nil && !errors.Is(lerr, http.ErrServerClosed) {
-			serverErr <- lerr
+			healthErr <- lerr
 		}
-		close(serverErr)
+		close(healthErr)
 	}()
 
 	select {
 	case <-ctx.Done():
 		logger.Info("shutdown signal received")
-	case lerr, ok := <-serverErr:
+	case lerr, ok := <-healthErr:
 		if ok && lerr != nil {
 			logger.Error("health server failed", "error", lerr.Error())
 		}
 	}
+
+	queueServer.Shutdown()
 
 	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), shutdownTimeout)
 	defer shutdownCancel()
