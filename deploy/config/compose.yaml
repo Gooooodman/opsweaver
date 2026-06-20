@@ -1,0 +1,19 @@
+server:
+  port: 8080
+  database:
+    dsn: postgres://opsweaver:opsweaver@postgres:5432/opsweaver_server_db?sslmode=disable
+worker:
+  health_port: 8081
+gateway:
+  port: 8082
+  database:
+    dsn: postgres://opsweaver:opsweaver@postgres:5432/opsweaver_gateway_db?sslmode=disable
+asynq_redis:
+  addr: redis:6379
+  db: 0
+cache_redis:
+  addr: redis:6379
+  db: 1
+security:
+  internal_service_token: ""
+  master_key_base64: ""
