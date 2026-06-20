@@ -39,7 +39,7 @@
 
 ## 6. Change 验证
 
-- [ ] 6.1 运行 `go test ./...` 和 `go vet ./...`，修复所有失败
-- [ ] 6.2 运行 `docker compose -f deploy/docker-compose.yml up -d --wait`，验证两个数据库、Redis 和三个服务的 health/ready/metrics
-- [ ] 6.3 更新 README 的本地启动、迁移、环境变量和停止命令
-- [ ] 6.4 运行 `openspec validate bootstrap-platform-foundation --strict --no-interactive`
+- [x] 6.1 运行 `go test ./...` 和 `go vet ./...`，修复所有失败
+- [x] 6.2 运行 `docker compose -f deploy/docker-compose.yml up -d --wait`，验证两个数据库、Redis 和三个服务的 health/ready/metrics
+- [x] 6.3 更新 README 的本地启动、迁移、环境变量和停止命令
+- [x] 6.4 运行 `openspec validate bootstrap-platform-foundation --strict --no-interactive`
